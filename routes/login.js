@@ -3,6 +3,7 @@ var express = require('express');
 var router = express.Router();
 var mongoClient=require('mongodb');
 var bcrypt=require('bcrypt');
+var jwt=require('jsonwebtoken');
 const saltRounds=10;
 var url="mongodb://localhost:27017";
 
@@ -17,7 +18,15 @@ router.post("/login",async (req,res)=>{
     let password=await db.collection('user').findOne({email:req.body.email});
     let hash=password.pass;
     bcrypt.compare(req.body.pass,hash,function(err,result){
-       res.json(result);
+       if(result==true){
+            let signedToken=jwt.sign({
+              data:req.body.email
+            },'pqrstuvwxyz',{expiresIn:'1h'});
+            console.log(signedToken);
+       }
+       else{
+         res.json(result);
+       }
     })
     client.close();
 });
